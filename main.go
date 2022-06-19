@@ -9,9 +9,9 @@ import (
 
 func main() {
 	path := flag.String("path", EmptyString, "path to JSON trivy report")
-	target := flag.String("target", All, "vulnerability target")
-	severity := flag.String("severity", All, "severity level")
-	metadata := flag.Bool("metadata", false, "print metadata")
+	target := flag.String("target", All, "vulnerability target: [Java, Node.js, other]")
+	severity := flag.String("severity", All, "severity level: [ALL, CRITICAL, HIGH, MEDIUM, LOW]")
+	metadata := flag.Bool("metadata", false, "print metadata: [true, false]")
 	flag.Parse()
 
 	if *path == EmptyString {
