@@ -47,11 +47,7 @@ func defaultFunc(target string) bool {
 	return NodeJs != target && Java != target
 }
 
-func allFunc(target string) bool {
-	return true
-}
-
-func all(severity string) bool {
+func all[T any](input T) bool {
 	return true
 }
 
@@ -77,22 +73,22 @@ func fetch(target *string, severity *string, td *TrivyData, result []Vulnerabili
 	case All:
 		switch *severity {
 		case All:
-			result = filter(td.Results, allFunc, all, result)
+			result = filter(td.Results, all[string], all[string], result)
 		case Critical:
-			result = filter(td.Results, allFunc, critical, result)
+			result = filter(td.Results, all[string], critical, result)
 		case High:
-			result = filter(td.Results, allFunc, high, result)
+			result = filter(td.Results, all[string], high, result)
 		case Medium:
-			result = filter(td.Results, allFunc, medium, result)
+			result = filter(td.Results, all[string], medium, result)
 		case Low:
-			result = filter(td.Results, allFunc, all, result)
+			result = filter(td.Results, all[string], all[string], result)
 		default:
 			unknownSeverityProcess()
 		}
 	case Java:
 		switch *severity {
 		case All:
-			result = filter(td.Results, java, all, result)
+			result = filter(td.Results, java, all[string], result)
 		case Critical:
 			result = filter(td.Results, java, critical, result)
 		case High:
@@ -100,14 +96,14 @@ func fetch(target *string, severity *string, td *TrivyData, result []Vulnerabili
 		case Medium:
 			result = filter(td.Results, java, medium, result)
 		case Low:
-			result = filter(td.Results, java, all, result)
+			result = filter(td.Results, java, all[string], result)
 		default:
 			unknownSeverityProcess()
 		}
 	case NodeJs:
 		switch *severity {
 		case All:
-			result = filter(td.Results, nodeJs, all, result)
+			result = filter(td.Results, nodeJs, all[string], result)
 		case Critical:
 			result = filter(td.Results, nodeJs, critical, result)
 		case High:
@@ -115,14 +111,14 @@ func fetch(target *string, severity *string, td *TrivyData, result []Vulnerabili
 		case Medium:
 			result = filter(td.Results, nodeJs, medium, result)
 		case Low:
-			result = filter(td.Results, nodeJs, all, result)
+			result = filter(td.Results, nodeJs, all[string], result)
 		default:
 			unknownSeverityProcess()
 		}
 	default:
 		switch *severity {
 		case All:
-			result = filter(td.Results, defaultFunc, all, result)
+			result = filter(td.Results, defaultFunc, all[string], result)
 		case Critical:
 			result = filter(td.Results, defaultFunc, critical, result)
 		case High:
@@ -130,7 +126,7 @@ func fetch(target *string, severity *string, td *TrivyData, result []Vulnerabili
 		case Medium:
 			result = filter(td.Results, defaultFunc, medium, result)
 		case Low:
-			result = filter(td.Results, defaultFunc, all, result)
+			result = filter(td.Results, defaultFunc, all[string], result)
 		default:
 			unknownSeverityProcess()
 		}
