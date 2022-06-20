@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const inputPath = "/media/total/Data/GolandProjects/security-report-parser/resources/trivy.json"
+const inputPath = "./resources/trivy.json"
 
 func BenchmarkFetch(b *testing.B) {
 	data, err := os.ReadFile(inputPath)
