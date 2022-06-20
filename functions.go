@@ -28,7 +28,7 @@ func filter(results []ResultsData, byTarget func(string) bool, bySeverity func(s
 }
 
 func pretty[T any](t T) (string, error) {
-	val, err := json.MarshalIndent(t, EmptyString, "  ")
+	val, err := json.MarshalIndent(t, EmptyString, Ident)
 	if err != nil {
 		return EmptyString, err
 	}
@@ -64,7 +64,7 @@ func medium(severity string) bool {
 }
 
 func unknownSeverityProcess() {
-	fmt.Println("Unknown severity level")
+	fmt.Println(UnknownSeverityLevel)
 	os.Exit(1)
 }
 
