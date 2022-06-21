@@ -2,9 +2,20 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
+	"flag"
 	"fmt"
 	"os"
 )
+
+func initUserConfig() *UserConfig {
+	path := flag.String("path", EmptyString, PathUsage)
+	target := flag.String("target", All, TargetUsage)
+	severity := flag.String("severity", All, SeverityUsage)
+	metadata := flag.Bool("metadata", false, MetadataUsage)
+	flag.Parse()
+	return &UserConfig{Path: path, Target: target, Severity: severity, Metadata: metadata}
+}
 
 func check(e error) {
 	if e != nil {
@@ -13,8 +24,65 @@ func check(e error) {
 	}
 }
 
-func filter(results []ResultsData, byTarget func(string) bool, bySeverity func(string) bool,
-	result []VulnerabilityData) []VulnerabilityData {
+func fetch(uc *UserConfig, td *TrivyData) ([]VulnerabilityData, error) {
+	switch *uc.Target {
+	case All:
+		switch *uc.Severity {
+		case All, Low:
+			return filter(td.Results, all[string], all[string]), nil
+		case Critical:
+			return filter(td.Results, all[string], critical), nil
+		case High:
+			return filter(td.Results, all[string], high), nil
+		case Medium:
+			return filter(td.Results, all[string], medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	case Java:
+		switch *uc.Severity {
+		case All, Low:
+			return filter(td.Results, java, all[string]), nil
+		case Critical:
+			return filter(td.Results, java, critical), nil
+		case High:
+			return filter(td.Results, java, high), nil
+		case Medium:
+			return filter(td.Results, java, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	case NodeJs:
+		switch *uc.Severity {
+		case All, Low:
+			return filter(td.Results, nodeJs, all[string]), nil
+		case Critical:
+			return filter(td.Results, nodeJs, critical), nil
+		case High:
+			return filter(td.Results, nodeJs, high), nil
+		case Medium:
+			return filter(td.Results, nodeJs, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	default:
+		switch *uc.Severity {
+		case All, Low:
+			return filter(td.Results, defaultFunc, all[string]), nil
+		case Critical:
+			return filter(td.Results, defaultFunc, critical), nil
+		case High:
+			return filter(td.Results, defaultFunc, high), nil
+		case Medium:
+			return filter(td.Results, defaultFunc, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	}
+}
+
+func filter(results []ResultsData, byTarget func(string) bool, bySeverity func(string) bool) []VulnerabilityData {
+	result := make([]VulnerabilityData, 0)
 	for _, v := range results {
 		if byTarget(v.Target) {
 			for _, value := range v.Vulnerabilities {
@@ -63,73 +131,13 @@ func medium(severity string) bool {
 	return Critical == severity || High == severity || Medium == severity
 }
 
-func unknownSeverityProcess() {
-	fmt.Println(UnknownSeverityLevel)
-	os.Exit(1)
-}
-
-func fetch(target *string, severity *string, td *TrivyData, result []VulnerabilityData) []VulnerabilityData {
-	switch *target {
-	case All:
-		switch *severity {
-		case All:
-			result = filter(td.Results, all[string], all[string], result)
-		case Critical:
-			result = filter(td.Results, all[string], critical, result)
-		case High:
-			result = filter(td.Results, all[string], high, result)
-		case Medium:
-			result = filter(td.Results, all[string], medium, result)
-		case Low:
-			result = filter(td.Results, all[string], all[string], result)
-		default:
-			unknownSeverityProcess()
-		}
-	case Java:
-		switch *severity {
-		case All:
-			result = filter(td.Results, java, all[string], result)
-		case Critical:
-			result = filter(td.Results, java, critical, result)
-		case High:
-			result = filter(td.Results, java, high, result)
-		case Medium:
-			result = filter(td.Results, java, medium, result)
-		case Low:
-			result = filter(td.Results, java, all[string], result)
-		default:
-			unknownSeverityProcess()
-		}
-	case NodeJs:
-		switch *severity {
-		case All:
-			result = filter(td.Results, nodeJs, all[string], result)
-		case Critical:
-			result = filter(td.Results, nodeJs, critical, result)
-		case High:
-			result = filter(td.Results, nodeJs, high, result)
-		case Medium:
-			result = filter(td.Results, nodeJs, medium, result)
-		case Low:
-			result = filter(td.Results, nodeJs, all[string], result)
-		default:
-			unknownSeverityProcess()
-		}
-	default:
-		switch *severity {
-		case All:
-			result = filter(td.Results, defaultFunc, all[string], result)
-		case Critical:
-			result = filter(td.Results, defaultFunc, critical, result)
-		case High:
-			result = filter(td.Results, defaultFunc, high, result)
-		case Medium:
-			result = filter(td.Results, defaultFunc, medium, result)
-		case Low:
-			result = filter(td.Results, defaultFunc, all[string], result)
-		default:
-			unknownSeverityProcess()
-		}
+func printOut(uc *UserConfig, td *TrivyData, vulnerabilities []VulnerabilityData) {
+	output, err := pretty(vulnerabilities)
+	check(err)
+	if *uc.Metadata {
+		metadataOutput, err := pretty(td.Metadata)
+		check(err)
+		fmt.Println(metadataOutput)
 	}
-	return result
+	fmt.Println(output)
 }

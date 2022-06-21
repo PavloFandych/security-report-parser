@@ -1,6 +1,8 @@
 package main
 
-import "time"
+import (
+	"time"
+)
 
 type TrivyData struct {
 	SchemaVersion int32
@@ -113,4 +115,11 @@ type Nvd struct {
 type Redhat struct {
 	V3Vector string
 	V3Score  float32
+}
+
+type UserConfig struct {
+	Path     *string
+	Target   *string
+	Severity *string
+	Metadata *bool
 }

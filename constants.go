@@ -14,6 +14,6 @@ const (
 	TargetUsage          = "vulnerability target: [Java, Node.js, other]"
 	SeverityUsage        = "severity level: [ALL, CRITICAL, HIGH, MEDIUM, LOW]"
 	MetadataUsage        = "print metadata: [true, false]"
-	UnknownSeverityLevel = "Unknown severity level"
+	UnknownSeverityLevel = "unknown severity level"
 	Ident                = "  "
 )

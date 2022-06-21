@@ -2,40 +2,32 @@ package main
 
 import (
 	"encoding/json"
-	"flag"
 	"fmt"
 	"os"
 )
 
 func main() {
-	path := flag.String("path", EmptyString, PathUsage)
-	target := flag.String("target", All, TargetUsage)
-	severity := flag.String("severity", All, SeverityUsage)
-	metadata := flag.Bool("metadata", false, MetadataUsage)
-	flag.Parse()
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("Error: ", err)
+		}
+	}()
 
-	if *path == EmptyString {
+	userConfig := initUserConfig()
+	if *userConfig.Path == EmptyString {
 		fmt.Println(NoPath)
 		os.Exit(1)
 	}
 
-	data, err := os.ReadFile(*path)
+	data, err := os.ReadFile(*userConfig.Path)
 	check(err)
 
 	trivyData := TrivyData{}
 	err = json.Unmarshal(data, &trivyData)
 	check(err)
 
-	vulnerabilities := make([]VulnerabilityData, 0)
-	vulnerabilities = fetch(target, severity, &trivyData, vulnerabilities)
-
-	output, err := pretty(vulnerabilities)
+	vulnerabilities, err := fetch(userConfig, &trivyData)
 	check(err)
 
-	if *metadata {
-		metadataOutput, err := pretty(trivyData.Metadata)
-		check(err)
-		fmt.Println(metadataOutput)
-	}
-	fmt.Println(output)
+	printOut(userConfig, &trivyData, vulnerabilities)
 }

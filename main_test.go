@@ -6,9 +6,9 @@ import (
 	"testing"
 )
 
-const inputPath = "./resources/trivy.json"
-
 func BenchmarkFetch(b *testing.B) {
+	inputPath := "./resources/trivy.json"
+
 	data, err := os.ReadFile(inputPath)
 	check(err)
 
@@ -18,8 +18,9 @@ func BenchmarkFetch(b *testing.B) {
 
 	target := Java
 	severity := Critical
-	var vulnerabilities []VulnerabilityData
+	metadata := true
+
 	for i := 0; i < b.N; i++ {
-		fetch(&target, &severity, &trivyData, vulnerabilities)
+		fetch(&UserConfig{Path: &inputPath, Target: &target, Severity: &severity, Metadata: &metadata}, &trivyData)
 	}
 }
