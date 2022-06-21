@@ -13,21 +13,15 @@ func main() {
 		}
 	}()
 
-	userConfig := initUserConfig()
-	if *userConfig.Path == EmptyString {
-		fmt.Println(NoPath)
-		os.Exit(1)
-	}
-
-	data, err := os.ReadFile(*userConfig.Path)
+	uc, err := userConfig()
 	check(err)
 
-	trivyData := TrivyData{}
-	err = json.Unmarshal(data, &trivyData)
+	data, err := os.ReadFile(*uc.Path)
 	check(err)
 
-	vulnerabilities, err := fetch(userConfig, &trivyData)
+	td := TrivyData{}
+	err = json.Unmarshal(data, &td)
 	check(err)
 
-	printOut(userConfig, &trivyData, vulnerabilities)
+	td.printOut(uc)
 }

@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"time"
 )
 
@@ -10,6 +12,93 @@ type TrivyData struct {
 	ArtifactType  string
 	Metadata      Metadata
 	Results       []ResultsData
+}
+
+func (td *TrivyData) fetch(uc *UserConfig) ([]VulnerabilityData, error) {
+	switch *uc.Target {
+	case All:
+		switch *uc.Severity {
+		case All, Low:
+			return td.filter(all[string], all[string]), nil
+		case Critical:
+			return td.filter(all[string], critical), nil
+		case High:
+			return td.filter(all[string], high), nil
+		case Medium:
+			return td.filter(all[string], medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	case Java:
+		switch *uc.Severity {
+		case All, Low:
+			return td.filter(java, all[string]), nil
+		case Critical:
+			return td.filter(java, critical), nil
+		case High:
+			return td.filter(java, high), nil
+		case Medium:
+			return td.filter(java, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	case NodeJs:
+		switch *uc.Severity {
+		case All, Low:
+			return td.filter(nodeJs, all[string]), nil
+		case Critical:
+			return td.filter(nodeJs, critical), nil
+		case High:
+			return td.filter(nodeJs, high), nil
+		case Medium:
+			return td.filter(nodeJs, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	default:
+		switch *uc.Severity {
+		case All, Low:
+			return td.filter(defaultFunc, all[string]), nil
+		case Critical:
+			return td.filter(defaultFunc, critical), nil
+		case High:
+			return td.filter(defaultFunc, high), nil
+		case Medium:
+			return td.filter(defaultFunc, medium), nil
+		default:
+			return nil, errors.New(UnknownSeverityLevel)
+		}
+	}
+}
+
+func (td *TrivyData) filter(byTargetPredicate func(string) bool,
+	bySeverityPredicate func(string) bool) []VulnerabilityData {
+	result := make([]VulnerabilityData, 0)
+	for _, v := range td.Results {
+		if byTargetPredicate(v.Target) {
+			for _, value := range v.Vulnerabilities {
+				if bySeverityPredicate(value.Severity) {
+					result = append(result, value)
+				}
+			}
+		}
+	}
+	return result
+}
+
+func (td *TrivyData) printOut(uc *UserConfig) {
+	vulnerabilities, err := td.fetch(uc)
+	check(err)
+
+	output, err := pretty(vulnerabilities)
+	check(err)
+
+	if *uc.Metadata {
+		metadataOutput, err := pretty(td.Metadata)
+		check(err)
+		fmt.Println(metadataOutput)
+	}
+	fmt.Println(output)
 }
 
 type Metadata struct {
