@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -90,15 +91,15 @@ func (td *TrivyData) printOut(uc *UserConfig) {
 	vulnerabilities, err := td.fetch(uc)
 	check(err)
 
-	output, err := pretty(vulnerabilities)
+	vulnerabilitiesOutput, err := json.MarshalIndent(vulnerabilities, EmptyString, Ident)
 	check(err)
 
 	if *uc.Metadata {
-		metadataOutput, err := pretty(td.Metadata)
+		metadataOutput, err := json.MarshalIndent(td.Metadata, EmptyString, Ident)
 		check(err)
-		fmt.Println(metadataOutput)
+		fmt.Println(string(metadataOutput))
 	}
-	fmt.Println(output)
+	fmt.Println(string(vulnerabilitiesOutput))
 }
 
 type Metadata struct {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -25,14 +24,6 @@ func check(e error) {
 		fmt.Println(e)
 		os.Exit(1)
 	}
-}
-
-func pretty[T any](t T) (string, error) {
-	val, err := json.MarshalIndent(t, EmptyString, Ident)
-	if err != nil {
-		return EmptyString, err
-	}
-	return string(val), nil
 }
 
 func java(target string) bool {
