@@ -21,6 +21,6 @@ func BenchmarkFetch(b *testing.B) {
 	metadata := true
 
 	for i := 0; i < b.N; i++ {
-		fetch(&UserConfig{Path: &inputPath, Target: &target, Severity: &severity, Metadata: &metadata}, &trivyData)
+		_, _ = fetch(&UserConfig{Path: &inputPath, Target: &target, Severity: &severity, Metadata: &metadata}, &trivyData)
 	}
 }
