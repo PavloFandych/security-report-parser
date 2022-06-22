@@ -8,10 +8,10 @@ import (
 )
 
 type TrivyData struct {
-	SchemaVersion int32
-	ArtifactName  string
-	ArtifactType  string
-	Metadata      Metadata
+	SchemaVersion *uint8
+	ArtifactName  *string
+	ArtifactType  *string
+	Metadata      *Metadata
 	Results       []ResultsData
 }
 
@@ -72,8 +72,7 @@ func (td *TrivyData) fetch(uc *UserConfig) ([]VulnerabilityData, error) {
 	}
 }
 
-func (td *TrivyData) filter(byTargetPredicate func(string) bool,
-	bySeverityPredicate func(string) bool) []VulnerabilityData {
+func (td *TrivyData) filter(byTargetPredicate, bySeverityPredicate func(*string) bool) []VulnerabilityData {
 	result := make([]VulnerabilityData, 0)
 	for _, v := range td.Results {
 		if byTargetPredicate(v.Target) {
@@ -87,19 +86,20 @@ func (td *TrivyData) filter(byTargetPredicate func(string) bool,
 	return result
 }
 
-func (td *TrivyData) printOut(uc *UserConfig) {
+func (td *TrivyData) process(uc *UserConfig) {
 	vulnerabilities, err := td.fetch(uc)
 	check(err)
 
-	vulnerabilitiesOutput, err := json.MarshalIndent(vulnerabilities, EmptyString, Ident)
-	check(err)
-
-	if *uc.Metadata {
-		metadataOutput, err := json.MarshalIndent(td.Metadata, EmptyString, Ident)
+	if *uc.PrettyPrint {
+		pretty, err := json.MarshalIndent(vulnerabilities, EmptyString, Ident)
 		check(err)
-		fmt.Println(string(metadataOutput))
+
+		fmt.Println(string(pretty))
+	} else {
+		output, err := json.Marshal(vulnerabilities)
+		check(err)
+		fmt.Println(string(output))
 	}
-	fmt.Println(string(vulnerabilitiesOutput))
 }
 
 type Metadata struct {
@@ -142,9 +142,9 @@ type OS struct {
 }
 
 type ResultsData struct {
-	Target          string
-	Class           string
-	Type            string
+	Target          *string
+	Class           *string
+	Type            *string
 	Vulnerabilities []VulnerabilityData
 }
 
@@ -155,61 +155,61 @@ type HistoryData struct {
 }
 
 type VulnerabilityData struct {
-	VulnerabilityID  string
-	PkgName          string
-	PkgPath          string
-	InstalledVersion string
-	FixedVersion     string
-	Layer            Layer
-	SeveritySource   string
-	PrimaryURL       string
-	DataSource       DataSource
-	Title            string
-	Description      string
-	Severity         string
-	CweIDs           []string
-	CVSS             CVSS
+	VulnerabilityID  *string
+	PkgName          *string
+	PkgPath          *string
+	InstalledVersion *string
+	FixedVersion     *string
+	Layer            *Layer
+	SeveritySource   *string
+	PrimaryURL       *string
+	DataSource       *DataSource
+	Title            *string
+	Description      *string
+	Severity         *string
+	CweIDs           *[]string
+	CVSS             *CVSS
 	References       []string
-	PublishedDate    time.Time
-	LastModifiedDate time.Time
+	PublishedDate    *time.Time
+	LastModifiedDate *time.Time
 }
 
 type Layer struct {
-	DiffID string
+	DiffID *string
 }
 
 type DataSource struct {
-	ID   string
-	Name string
-	URL  string
+	ID   *string
+	Name *string
+	URL  *string
 }
 
 type CVSS struct {
-	Ghsa   Ghsa   `json:"ghsa"`
-	Nvd    Nvd    `json:"nvd"`
-	Redhat Redhat `json:"redhat"`
+	Ghsa   *Ghsa   `json:"ghsa"`
+	Nvd    *Nvd    `json:"nvd"`
+	Redhat *Redhat `json:"redhat"`
 }
 
 type Ghsa struct {
-	V3Vector string
-	V3Score  float32
+	V3Vector *string
+	V3Score  *float32
 }
 
 type Nvd struct {
-	V2Vector string
-	V3Vector string
-	V2Score  float32
-	V3Score  float32
+	V2Vector *string
+	V3Vector *string
+	V2Score  *float32
+	V3Score  *float32
 }
 
 type Redhat struct {
-	V3Vector string
-	V3Score  float32
+	V3Vector *string
+	V3Score  *float32
 }
 
 type UserConfig struct {
-	Path     *string
-	Target   *string
-	Severity *string
-	Metadata *bool
+	Path        *string
+	Target      *string
+	Severity    *string
+	PrettyPrint *bool
 }

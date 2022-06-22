@@ -18,9 +18,13 @@ func BenchmarkFetch(b *testing.B) {
 
 	target := Java
 	severity := Critical
-	metadata := true
+	prettyPrint := false
 
 	for i := 0; i < b.N; i++ {
-		_, _ = trivyData.fetch(&UserConfig{Path: &inputPath, Target: &target, Severity: &severity, Metadata: &metadata})
+		_, _ = trivyData.fetch(&UserConfig{
+			Path:        &inputPath,
+			Target:      &target,
+			Severity:    &severity,
+			PrettyPrint: &prettyPrint})
 	}
 }

@@ -23,5 +23,5 @@ func main() {
 	err = json.Unmarshal(data, &td)
 	check(err)
 
-	td.printOut(uc)
+	td.process(uc)
 }
